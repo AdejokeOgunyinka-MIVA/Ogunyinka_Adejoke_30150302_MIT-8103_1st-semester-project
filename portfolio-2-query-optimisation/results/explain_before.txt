@@ -1,0 +1,180 @@
+=== Existing indexes (only PK/UNIQUE) ===
+  tablename  |              indexname              
+-------------+-------------------------------------
+ addresses   | addresses_pkey
+ categories  | categories_name_key
+ categories  | categories_pkey
+ customers   | customers_email_key
+ customers   | customers_pkey
+ deliveries  | deliveries_order_id_key
+ deliveries  | deliveries_pkey
+ deliveries  | deliveries_tracking_number_key
+ order_items | order_items_order_id_product_id_key
+ order_items | order_items_pkey
+ orders      | orders_pkey
+ payments    | payments_pkey
+ products    | products_pkey
+ reviews     | reviews_customer_id_product_id_key
+ reviews     | reviews_pkey
+(15 rows)
+
+
+=== Q1. Customer order history ===
+                                                  QUERY PLAN                                                  
+--------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1509.17..1509.19 rows=10 width=28) (actual time=2.585..2.585 rows=11 loops=1)
+   Sort Key: order_date DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=887
+   ->  Seq Scan on orders o  (cost=0.00..1509.00 rows=10 width=28) (actual time=0.732..2.578 rows=11 loops=1)
+         Filter: (customer_id = 4123)
+         Rows Removed by Filter: 49989
+         Buffers: shared hit=884
+ Planning:
+   Buffers: shared hit=50
+ Planning Time: 0.134 ms
+ Execution Time: 2.595 ms
+(12 rows)
+
+
+=== Q2. Catalogue search by name ===
+                                                 QUERY PLAN                                                 
+------------------------------------------------------------------------------------------------------------
+ Sort  (cost=14.54..14.58 rows=15 width=35) (actual time=0.195..0.195 rows=17 loops=1)
+   Sort Key: price
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=11
+   ->  Seq Scan on products  (cost=0.00..14.25 rows=15 width=35) (actual time=0.007..0.185 rows=17 loops=1)
+         Filter: ((name)::text ~~* 'Samsung%'::text)
+         Rows Removed by Filter: 483
+         Buffers: shared hit=8
+ Planning:
+   Buffers: shared hit=38
+ Planning Time: 0.157 ms
+ Execution Time: 0.199 ms
+(12 rows)
+
+
+=== Q3. Products in category with stock ===
+                                                       QUERY PLAN                                                        
+-------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=17.68..17.75 rows=25 width=41) (actual time=0.082..0.084 rows=32 loops=1)
+   Sort Key: p.price
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=9
+   ->  Hash Join  (cost=1.26..17.10 rows=25 width=41) (actual time=0.013..0.074 rows=32 loops=1)
+         Hash Cond: (p.category_id = c.id)
+         Buffers: shared hit=9
+         ->  Seq Scan on products p  (cost=0.00..14.25 rows=500 width=35) (actual time=0.003..0.040 rows=500 loops=1)
+               Filter: (stock_quantity > 0)
+               Buffers: shared hit=8
+         ->  Hash  (cost=1.25..1.25 rows=1 width=14) (actual time=0.007..0.007 rows=1 loops=1)
+               Buckets: 1024  Batches: 1  Memory Usage: 9kB
+               Buffers: shared hit=1
+               ->  Seq Scan on categories c  (cost=0.00..1.25 rows=1 width=14) (actual time=0.003..0.004 rows=1 loops=1)
+                     Filter: ((name)::text = 'Phones'::text)
+                     Rows Removed by Filter: 19
+                     Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=149
+ Planning Time: 0.229 ms
+ Execution Time: 0.094 ms
+(21 rows)
+
+
+=== Q4. Shipped orders in last 30 days ===
+                                               QUERY PLAN                                               
+--------------------------------------------------------------------------------------------------------
+ Seq Scan on orders  (cost=0.00..1884.00 rows=260 width=24) (actual time=0.087..4.141 rows=247 loops=1)
+   Filter: (((status)::text = 'shipped'::text) AND (order_date >= (now() - '30 days'::interval)))
+   Rows Removed by Filter: 49753
+   Buffers: shared hit=884
+ Planning:
+   Buffers: shared hit=7
+ Planning Time: 0.032 ms
+ Execution Time: 4.153 ms
+(8 rows)
+
+
+=== Q5. Top 10 selling products ===
+                                                                                 QUERY PLAN                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=5690.55..5690.57 rows=10 width=63) (actual time=31.011..31.278 rows=10 loops=1)
+   Buffers: shared hit=2898
+   ->  Sort  (cost=5690.55..5691.80 rows=500 width=63) (actual time=31.011..31.277 rows=10 loops=1)
+         Sort Key: (sum(oi.quantity)) DESC
+         Sort Method: top-N heapsort  Memory: 26kB
+         Buffers: shared hit=2898
+         ->  Finalize GroupAggregate  (cost=5610.99..5679.74 rows=500 width=63) (actual time=30.457..31.202 rows=500 loops=1)
+               Group Key: p.id
+               Buffers: shared hit=2895
+               ->  Gather Merge  (cost=5610.99..5668.49 rows=500 width=63) (actual time=30.450..30.832 rows=1000 loops=1)
+                     Workers Planned: 1
+                     Workers Launched: 1
+                     Buffers: shared hit=2895
+                     ->  Sort  (cost=4610.98..4612.23 rows=500 width=63) (actual time=29.056..29.076 rows=500 loops=2)
+                           Sort Key: p.id
+                           Sort Method: quicksort  Memory: 84kB
+                           Buffers: shared hit=2895
+                           Worker 0:  Sort Method: quicksort  Memory: 84kB
+                           ->  Partial HashAggregate  (cost=4582.32..4588.57 rows=500 width=63) (actual time=28.847..28.956 rows=500 loops=2)
+                                 Group Key: p.id
+                                 Batches: 1  Memory Usage: 297kB
+                                 Buffers: shared hit=2888
+                                 Worker 0:  Batches: 1  Memory Usage: 297kB
+                                 ->  Hash Join  (cost=1796.54..4109.70 rows=37810 width=35) (actual time=5.544..21.025 rows=32094 loops=2)
+                                       Hash Cond: (oi.product_id = p.id)
+                                       Buffers: shared hit=2888
+                                       ->  Hash Join  (cost=1777.29..3990.35 rows=37810 width=16) (actual time=5.431..16.857 rows=32094 loops=2)
+                                             Hash Cond: (oi.order_id = o.id)
+                                             Buffers: shared hit=2869
+                                             ->  Parallel Seq Scan on order_items oi  (cost=0.00..1981.82 rows=88082 width=20) (actual time=0.002..3.789 rows=74870 loops=2)
+                                                   Buffers: shared hit=1101
+                                             ->  Hash  (cost=1509.00..1509.00 rows=21463 width=4) (actual time=5.402..5.402 rows=21434 loops=2)
+                                                   Buckets: 32768  Batches: 1  Memory Usage: 1010kB
+                                                   Buffers: shared hit=1768
+                                                   ->  Seq Scan on orders o  (cost=0.00..1509.00 rows=21463 width=4) (actual time=0.171..3.924 rows=21434 loops=2)
+                                                         Filter: ((status)::text = 'delivered'::text)
+                                                         Rows Removed by Filter: 28566
+                                                         Buffers: shared hit=1768
+                                       ->  Hash  (cost=13.00..13.00 rows=500 width=23) (actual time=0.105..0.105 rows=500 loops=2)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 35kB
+                                             Buffers: shared hit=16
+                                             ->  Seq Scan on products p  (cost=0.00..13.00 rows=500 width=23) (actual time=0.017..0.057 rows=500 loops=2)
+                                                   Buffers: shared hit=16
+ Planning:
+   Buffers: shared hit=103
+ Planning Time: 0.421 ms
+ Execution Time: 31.316 ms
+(47 rows)
+
+
+=== Q6. Revenue by state ===
+                                                              QUERY PLAN                                                              
+--------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=2168.20..2168.24 rows=15 width=46) (actual time=17.579..17.580 rows=15 loops=1)
+   Sort Key: (sum(o.total_amount)) DESC
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=952
+   ->  HashAggregate  (cost=2167.72..2167.90 rows=15 width=46) (actual time=17.572..17.575 rows=15 loops=1)
+         Group Key: a.state
+         Batches: 1  Memory Usage: 24kB
+         Buffers: shared hit=952
+         ->  Hash Join  (cost=236.59..1901.37 rows=35513 width=14) (actual time=1.303..12.609 rows=35615 loops=1)
+               Hash Cond: (o.address_id = a.id)
+               Buffers: shared hit=952
+               ->  Seq Scan on orders o  (cost=0.00..1571.50 rows=35513 width=12) (actual time=0.047..6.222 rows=35615 loops=1)
+                     Filter: ((status)::text = ANY ('{paid,shipped,delivered}'::text[]))
+                     Rows Removed by Filter: 14385
+                     Buffers: shared hit=884
+               ->  Hash  (cost=142.93..142.93 rows=7493 width=10) (actual time=1.252..1.252 rows=7493 loops=1)
+                     Buckets: 8192  Batches: 1  Memory Usage: 382kB
+                     Buffers: shared hit=68
+                     ->  Seq Scan on addresses a  (cost=0.00..142.93 rows=7493 width=10) (actual time=0.002..0.617 rows=7493 loops=1)
+                           Buffers: shared hit=68
+ Planning:
+   Buffers: shared hit=88
+ Planning Time: 0.272 ms
+ Execution Time: 17.596 ms
+(24 rows)
+
