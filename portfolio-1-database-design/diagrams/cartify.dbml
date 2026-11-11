@@ -1,0 +1,86 @@
+// Cartify ER diagram - paste this into https://dbdiagram.io
+// Then File > Export > PNG and save as diagrams/cartify-er-diagram.png
+
+Table customers {
+  id int [pk, increment]
+  full_name varchar(100) [not null]
+  email varchar(150) [not null, unique]
+  phone varchar(20) [not null]
+  created_at timestamp [not null]
+}
+
+Table addresses {
+  id int [pk, increment]
+  customer_id int [not null, ref: > customers.id]
+  street varchar(200) [not null]
+  city varchar(100) [not null]
+  state varchar(50) [not null]
+  is_default boolean [not null]
+}
+
+Table categories {
+  id int [pk, increment]
+  name varchar(100) [not null, unique]
+  parent_id int [ref: > categories.id]
+}
+
+Table products {
+  id int [pk, increment]
+  category_id int [not null, ref: > categories.id]
+  name varchar(150) [not null]
+  description text
+  price numeric(12,2) [not null]
+  stock_quantity int [not null]
+  created_at timestamp [not null]
+}
+
+Table orders {
+  id int [pk, increment]
+  customer_id int [not null, ref: > customers.id]
+  address_id int [not null, ref: > addresses.id]
+  status varchar(20) [not null, note: 'pending | paid | shipped | delivered | cancelled']
+  order_date timestamp [not null]
+  total_amount numeric(12,2) [not null]
+}
+
+Table order_items {
+  id int [pk, increment]
+  order_id int [not null, ref: > orders.id]
+  product_id int [not null, ref: > products.id]
+  quantity int [not null]
+  unit_price numeric(12,2) [not null]
+  indexes {
+    (order_id, product_id) [unique]
+  }
+}
+
+Table payments {
+  id int [pk, increment]
+  order_id int [not null, ref: > orders.id]
+  method varchar(20) [not null, note: 'card | bank_transfer | ussd | wallet | cash_on_delivery']
+  amount numeric(12,2) [not null]
+  status varchar(20) [not null, note: 'pending | successful | failed | refunded']
+  paid_at timestamp
+}
+
+Table deliveries {
+  id int [pk, increment]
+  order_id int [not null, unique, ref: - orders.id]
+  courier varchar(50) [not null]
+  tracking_number varchar(50) [unique]
+  status varchar(20) [not null, note: 'processing | dispatched | in_transit | delivered | failed']
+  dispatched_at timestamp
+  delivered_at timestamp
+}
+
+Table reviews {
+  id int [pk, increment]
+  customer_id int [not null, ref: > customers.id]
+  product_id int [not null, ref: > products.id]
+  rating smallint [not null, note: '1 to 5']
+  comment text
+  created_at timestamp [not null]
+  indexes {
+    (customer_id, product_id) [unique]
+  }
+}

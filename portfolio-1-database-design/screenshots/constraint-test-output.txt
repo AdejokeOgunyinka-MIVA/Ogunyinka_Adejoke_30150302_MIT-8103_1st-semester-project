@@ -1,0 +1,25 @@
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+--- TEST 1: duplicate email (expect UNIQUE violation) ---
+psql:portfolio-1-database-design/sql/02_constraint_tests.sql:17: ERROR:  duplicate key value violates unique constraint "customers_email_key"
+DETAIL:  Key (email)=(test@cartify.ng) already exists.
+--- TEST 2: negative stock (expect CHECK violation) ---
+psql:portfolio-1-database-design/sql/02_constraint_tests.sql:20: ERROR:  new row for relation "products" violates check constraint "products_stock_quantity_check"
+DETAIL:  Failing row contains (1, 1, Test Product, null, 1000.00, -1, 2026-11-11 12:50:25.711136).
+--- TEST 3: invalid order status (expect CHECK violation) ---
+psql:portfolio-1-database-design/sql/02_constraint_tests.sql:24: ERROR:  new row for relation "orders" violates check constraint "orders_status_check"
+DETAIL:  Failing row contains (1, 1, 1, lost, 2026-11-11 12:50:25.712685, 0.00).
+--- TEST 4: order for a customer that does not exist (expect FK violation) ---
+psql:portfolio-1-database-design/sql/02_constraint_tests.sql:28: ERROR:  insert or update on table "addresses" violates foreign key constraint "addresses_customer_id_fkey"
+DETAIL:  Key (customer_id)=(999) is not present in table "customers".
+--- TEST 5: rating of 7 (expect CHECK violation) ---
+psql:portfolio-1-database-design/sql/02_constraint_tests.sql:31: ERROR:  new row for relation "reviews" violates check constraint "reviews_rating_check"
+DETAIL:  Failing row contains (1, 1, 1, 7, null, 2026-11-11 12:50:25.713233).
+--- TEST 6: negative price (expect CHECK violation) ---
+psql:portfolio-1-database-design/sql/02_constraint_tests.sql:34: ERROR:  new row for relation "products" violates check constraint "products_price_check"
+DETAIL:  Failing row contains (2, 1, Bad Price, null, -50.00, 0, 2026-11-11 12:50:25.713444).
+DELETE 1
+DELETE 1
+DELETE 1
+--- All six statements above should have shown an ERROR. That is the expected result. ---
