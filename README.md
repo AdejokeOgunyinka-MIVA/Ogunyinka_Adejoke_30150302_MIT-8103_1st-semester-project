@@ -1,0 +1,2 @@
+# Ogunyinka_Adejoke_30150302_MIT-8103_1st-semester-project
+Students are required to develop and maintain an Advanced Database Systems Portfolio throughout the semester. The portfolio assesses their ability to design, implement, analyse, optimise, and manage advanced database systems in practical contexts. This is not a conventional written assignment. Students must provide practical evidence of work.
