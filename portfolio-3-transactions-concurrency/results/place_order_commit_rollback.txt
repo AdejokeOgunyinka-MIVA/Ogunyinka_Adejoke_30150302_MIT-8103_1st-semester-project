@@ -1,0 +1,92 @@
+UPDATE 1
+UPDATE 1
+==========================================================
+PART A: a successful order, committed
+==========================================================
+Stock before:
+ id |     name      | stock_quantity 
+----+---------------+----------------
+  1 | Tecno Gown 1  |             10
+  2 | Zara Lotion 2 |              2
+(2 rows)
+
+BEGIN
+INSERT 0 1
+INSERT 0 2
+UPDATE 2
+UPDATE 1
+COMMIT
+Order created:
+  id   | customer_id | status  | total_amount 
+-------+-------------+---------+--------------
+ 50001 |           1 | pending |    280000.00
+(1 row)
+
+Stock after COMMIT (10 -> 9, 2 -> 0):
+ id |     name      | stock_quantity 
+----+---------------+----------------
+  1 | Tecno Gown 1  |              9
+  2 | Zara Lotion 2 |              0
+(2 rows)
+
+
+==========================================================
+PART B: an order that fails midway, rolled back
+Product 2 now has 0 stock. The CHECK constraint rejects the
+stock update, and the whole transaction is undone.
+==========================================================
+Orders count before:
+ orders_before 
+---------------
+         50001
+(1 row)
+
+BEGIN
+INSERT 0 1
+INSERT 0 1
+Attempting to reduce stock of product 2 below zero...
+psql:portfolio-3-transactions-concurrency/sql/01_place_order_commit_rollback.sql:67: ERROR:  new row for relation "products" violates check constraint "products_stock_quantity_check"
+DETAIL:  Failing row contains (2, 9, Zara Lotion 2, Quality product sold on Cartify. Item number 2., 15000.00, -1, 2026-07-27 00:27:04.221836).
+ROLLBACK
+Orders count after ROLLBACK (unchanged):
+ orders_after 
+--------------
+        50001
+(1 row)
+
+The failed order id does not exist:
+ rows_with_failed_id 
+---------------------
+                   0
+(1 row)
+
+
+==========================================================
+PART C: SAVEPOINT - partial rollback inside a transaction
+Customer adds two items; the second is out of stock. Keep the
+first, drop only the second, and still commit the order.
+==========================================================
+BEGIN
+INSERT 0 1
+INSERT 0 1
+UPDATE 1
+SAVEPOINT
+INSERT 0 1
+psql:portfolio-3-transactions-concurrency/sql/01_place_order_commit_rollback.sql:103: ERROR:  new row for relation "products" violates check constraint "products_stock_quantity_check"
+DETAIL:  Failing row contains (2, 9, Zara Lotion 2, Quality product sold on Cartify. Item number 2., 15000.00, -1, 2026-07-27 00:27:04.221836).
+ROLLBACK
+UPDATE 1
+COMMIT
+Order committed with only item 1:
+ order_id | product_id | quantity | total_amount 
+----------+------------+----------+--------------
+    50003 |          1 |        1 |    250000.00
+(1 row)
+
+Stock after (product 1: 9 -> 8, product 2 still 0):
+ id |     name      | stock_quantity 
+----+---------------+----------------
+  1 | Tecno Gown 1  |              8
+  2 | Zara Lotion 2 |              0
+(2 rows)
+

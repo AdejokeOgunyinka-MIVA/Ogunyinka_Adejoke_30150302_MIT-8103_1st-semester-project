@@ -1,0 +1,21 @@
+B:  pg_sleep 
+B: ----------
+B:  
+B: (1 row)
+B: 
+B: [B] BEGIN
+B: [B] read price = 100000.00 , adding 5000 surcharge
+B: [B] COMMIT
+A: [A] BEGIN
+A: [A] read price = 100000.00 , applying 10% discount
+A:  pg_sleep 
+A: ----------
+A:  
+A: (1 row)
+A: 
+A: [A] COMMIT
+ id | price_after_unsafe |                  note                   
+----+--------------------+-----------------------------------------
+  4 |           90000.00 | expected 95000.00 (100000 * 0.9 + 5000)
+(1 row)
+

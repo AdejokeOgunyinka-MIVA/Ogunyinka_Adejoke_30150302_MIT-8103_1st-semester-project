@@ -1,0 +1,29 @@
+B:  pg_sleep 
+B: ----------
+B:  
+B: (1 row)
+B: 
+B: [B] BEGIN ISOLATION LEVEL SERIALIZABLE
+B: [B] sees stock = 1
+B: [B] COMMIT
+A: [A] BEGIN ISOLATION LEVEL SERIALIZABLE
+A: [A] sees stock = 1
+A:  pg_sleep 
+A: ----------
+A:  
+A: (1 row)
+A: 
+A: [A] writes stock = 1 - 1 (B has already committed its sale)
+A: psql:sql/session_a_oversell_serializable.sql:9: ERROR:  could not serialize access due to concurrent update
+A: psql:sql/session_a_oversell_serializable.sql:10: ERROR:  current transaction is aborted, commands ignored until end of transaction block
+A: [A] COMMIT
+ id |         name         | stock_after_serializable 
+----+----------------------+--------------------------
+  3 | Indomie Smartphone 3 |                        0
+(1 row)
+
+ orders_sold_serializable 
+--------------------------
+                        1
+(1 row)
+

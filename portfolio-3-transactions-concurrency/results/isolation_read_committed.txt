@@ -1,0 +1,25 @@
+B:  pg_sleep 
+B: ----------
+B:  
+B: (1 row)
+B: 
+B: [B] updating price of product 1 to 199999.00 and committing
+B: [B] done
+A: [A] starting transaction at isolation level READ COMMITTED
+A: [A] first read:
+A:  id |     name     |   price   
+A: ----+--------------+-----------
+A:   1 | Tecno Gown 1 | 250000.00
+A: (1 row)
+A: 
+A:  pg_sleep 
+A: ----------
+A:  
+A: (1 row)
+A: 
+A: [A] second read, after Session B committed a price change:
+A:  id |     name     |   price   
+A: ----+--------------+-----------
+A:   1 | Tecno Gown 1 | 199999.00
+A: (1 row)
+A: 

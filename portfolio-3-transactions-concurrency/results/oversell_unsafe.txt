@@ -1,0 +1,30 @@
+B:  pg_sleep 
+B: ----------
+B:  
+B: (1 row)
+B: 
+B: [B] BEGIN
+B: [B] reading stock WITHOUT lock
+B: [B] sees stock = 1
+B: [B] stock > 0, so B sells one unit and writes stock = 1 - 1
+B: [B] COMMIT
+A: [A] BEGIN
+A: [A] reading stock WITHOUT lock (plain SELECT)
+A: [A] sees stock = 1
+A:  pg_sleep 
+A: ----------
+A:  
+A: (1 row)
+A: 
+A: [A] stock > 0, so A sells one unit and writes stock = 1 - 1
+A: [A] COMMIT
+ id |         name         | stock_after_unsafe 
+----+----------------------+--------------------
+  3 | Indomie Smartphone 3 |                  0
+(1 row)
+
+ orders_sold_unsafe 
+--------------------
+                  2
+(1 row)
+
