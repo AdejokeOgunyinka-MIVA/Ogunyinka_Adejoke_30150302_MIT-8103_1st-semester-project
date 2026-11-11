@@ -1,0 +1,13 @@
+# Cartify MongoDB for Portfolio 4
+# Start:  docker compose -f portfolio-4-nosql/docker/docker-compose.yml up -d
+# Stop:   docker compose -f portfolio-4-nosql/docker/docker-compose.yml down
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: cartify-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - cartify-mongo-data:/data/db
+volumes:
+  cartify-mongo-data:

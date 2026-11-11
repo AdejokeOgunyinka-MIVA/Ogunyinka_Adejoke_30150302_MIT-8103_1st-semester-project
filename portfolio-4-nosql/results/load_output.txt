@@ -1,0 +1,116 @@
+Inserted 500 products
+Inserted 5000 orders
+
+Collections:
+[
+  'orders',
+  'products'
+]
+
+products indexes:
+  _id_
+  category.name_1_price_1
+  attributes.ram_gb_1
+  name_text_description_text
+orders indexes:
+  _id_
+  customer.id_1_order_date_-1
+  status_1_order_date_-1
+  items.product_id_1
+
+Sample product document:
+{
+  _id: 234,
+  name: 'Oraimo Lotion 234',
+  description: 'Quality product sold on Cartify. Item number 234.',
+  price: 1707.58,
+  stock: 51,
+  category: {
+    id: 6,
+    name: 'Phones',
+    parent: 'Electronics'
+  },
+  attributes: {
+    ram_gb: 8,
+    storage_gb: 64,
+    colour: 'Black',
+    dual_sim: true
+  },
+  rating: {
+    average: 2.86,
+    count: 74
+  },
+  recent_reviews: [
+    {
+      customer: 'Femi Adeyemi',
+      rating: 1,
+      comment: 'Fast delivery',
+      date: ISODate('2026-11-05T10:31:31.330Z')
+    },
+    {
+      customer: 'Adejoke Bello',
+      rating: 2,
+      comment: 'Would buy again',
+      date: ISODate('2026-11-05T00:38:50.785Z')
+    },
+    {
+      customer: 'Ngozi Chukwu',
+      rating: 5,
+      comment: 'Would buy again',
+      date: ISODate('2026-10-24T10:13:49.064Z')
+    }
+  ],
+  created_at: ISODate('2026-07-19T20:06:43.207Z')
+}
+
+Sample order document:
+{
+  _id: 2586,
+  status: 'delivered',
+  order_date: ISODate('2026-11-11T09:52:44.477Z'),
+  total: 1584407.27,
+  customer: {
+    id: 3096,
+    name: 'Kunle Adebayo',
+    email: 'customer3096@example.ng'
+  },
+  ship_to: {
+    street: '122 Awolowo Road',
+    city: 'Abeokuta',
+    state: 'Ogun'
+  },
+  items: [
+    {
+      product_id: 72,
+      name: 'Indomie Sofa 72',
+      qty: 1,
+      unit_price: 238986.57,
+      line_total: 238986.57
+    },
+    {
+      product_id: 148,
+      name: 'Peak Milk Powder 148',
+      qty: 2,
+      unit_price: 254743.16,
+      line_total: 509486.32
+    },
+    {
+      product_id: 349,
+      name: 'Infinix Sneakers 349',
+      qty: 2,
+      unit_price: 417967.19,
+      line_total: 835934.38
+    }
+  ],
+  payment: {
+    method: 'ussd',
+    status: 'successful',
+    paid_at: ISODate('2026-11-11T09:57:44.477Z')
+  },
+  delivery: {
+    courier: 'GIG Logistics',
+    tracking: 'CTF00002586',
+    status: 'delivered',
+    delivered_at: ISODate('2026-11-15T09:52:44.477Z')
+  }
+}

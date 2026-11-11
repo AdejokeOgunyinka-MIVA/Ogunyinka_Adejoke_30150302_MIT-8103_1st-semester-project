@@ -1,0 +1,274 @@
+
+=== Q1. Phones with at least 8GB RAM under 300,000 naira ===
+{
+  _id: 234,
+  name: 'Oraimo Lotion 234',
+  price: 1707.58,
+  attributes: {
+    ram_gb: 8,
+    storage_gb: 64
+  }
+}
+{
+  _id: 42,
+  name: 'Mama Gold Rice 50kg 42',
+  price: 37332.28,
+  attributes: {
+    ram_gb: 8,
+    storage_gb: 64
+  }
+}
+{
+  _id: 54,
+  name: 'Peak Laptop 54',
+  price: 38789.1,
+  attributes: {
+    ram_gb: 8,
+    storage_gb: 64
+  }
+}
+{
+  _id: 87,
+  name: 'Dettol Gown 87',
+  price: 39134.72,
+  attributes: {
+    ram_gb: 12,
+    storage_gb: 64
+  }
+}
+{
+  _id: 203,
+  name: 'Samsung Bluetooth Speaker 203',
+  price: 81390.88,
+  attributes: {
+    ram_gb: 12,
+    storage_gb: 256
+  }
+}
+
+=== Q2. Product page: one document read, no joins ===
+{
+  _id: 1,
+  name: 'Tecno Gown 1',
+  price: 250000,
+  category: {
+    id: 20,
+    name: 'Supplements',
+    parent: 'Beauty & Health'
+  },
+  rating: {
+    average: 3.21,
+    count: 70
+  },
+  recent_reviews: [
+    {
+      customer: 'Sani Okafor',
+      rating: 5,
+      comment: 'Great product',
+      date: ISODate('2026-11-12T21:59:37.128Z')
+    },
+    {
+      customer: 'Chiamaka Ogunyinka',
+      rating: 3,
+      comment: 'Great product',
+      date: ISODate('2026-10-29T20:06:17.719Z')
+    },
+    {
+      customer: 'Adaeze Abubakar',
+      rating: 4,
+      comment: 'Not as described',
+      date: ISODate('2026-10-27T16:21:29.387Z')
+    }
+  ]
+}
+
+=== Q3. Full-text catalogue search ===
+{
+  _id: 32,
+  name: 'Samsung Smartphone 32',
+  price: 181638.42,
+  score: 1.3333333333333333
+}
+{
+  _id: 182,
+  name: 'Samsung Shirt 182',
+  price: 406708.72,
+  score: 0.6666666666666666
+}
+{
+  _id: 231,
+  name: 'Dettol Smartphone 231',
+  price: 158022.32,
+  score: 0.6666666666666666
+}
+{
+  _id: 339,
+  name: 'Adidas Smartphone 339',
+  price: 183697.81,
+  score: 0.6666666666666666
+}
+{
+  _id: 4,
+  name: 'Samsung Headset 4',
+  price: 95000,
+  score: 0.6666666666666666
+}
+
+=== Q4. Customer order history (uses index on customer.id + order_date) ===
+{
+  _id: 3868,
+  status: 'shipped',
+  order_date: ISODate('2026-06-24T03:32:02.717Z'),
+  total: 564811.44,
+  items: [
+    {
+      name: 'Tecno Noodles 308'
+    },
+    {
+      name: 'Zara Bluetooth Speaker 312'
+    },
+    {
+      name: 'Peak Lotion 440'
+    }
+  ]
+}
+{
+  _id: 1,
+  status: 'cancelled',
+  order_date: ISODate('2026-04-24T13:19:15.415Z'),
+  total: 1774848.42,
+  items: [
+    {
+      name: 'Dell Sofa 81'
+    },
+    {
+      name: 'Dano Pressure Cooker 346'
+    },
+    {
+      name: 'Tecno Earbuds 410'
+    }
+  ]
+}
+{
+  _id: 3901,
+  status: 'paid',
+  order_date: ISODate('2026-04-18T06:50:31.423Z'),
+  total: 1465029.38,
+  items: [
+    {
+      name: 'Adidas Vitamin C 34'
+    },
+    {
+      name: 'Samsung Milk Powder 51'
+    },
+    {
+      name: 'Peak Fridge 482'
+    }
+  ]
+}
+
+=== Q5. Orders that contain a specific product (multikey index on items.product_id) ===
+count: 22
+
+=== Q6. Aggregation: revenue by state for delivered orders ===
+{
+  _id: 'Lagos',
+  orders: 1015,
+  revenue: 1483209661.93
+}
+{
+  _id: 'FCT',
+  orders: 205,
+  revenue: 301680693.7
+}
+{
+  _id: 'Edo',
+  orders: 88,
+  revenue: 135174618.71
+}
+{
+  _id: 'Kwara',
+  orders: 86,
+  revenue: 126971929.06
+}
+{
+  _id: 'Ogun',
+  orders: 84,
+  revenue: 125967688.64
+}
+
+=== Q7. Aggregation: top 5 products by units sold ($unwind the embedded items) ===
+{
+  _id: 339,
+  name: 'Adidas Smartphone 339',
+  units: 56,
+  revenue: 10287077.360000001
+}
+{
+  _id: 487,
+  name: 'Tecno Sofa 487',
+  units: 55,
+  revenue: 3236847.9
+}
+{
+  _id: 277,
+  name: 'Dell Shirt 277',
+  units: 50,
+  revenue: 17600418
+}
+{
+  _id: 207,
+  name: 'Nivea Agbada 207',
+  units: 50,
+  revenue: 12452285.5
+}
+{
+  _id: 200,
+  name: 'Oraimo Noodles 200',
+  units: 49,
+  revenue: 9090433.940000001
+}
+
+=== Q8. Aggregation: average rating and count per top-level category ===
+{
+  _id: 'Fashion',
+  products: 94,
+  avg_rating: 3.04
+}
+{
+  _id: 'Groceries',
+  products: 89,
+  avg_rating: 3.02
+}
+{
+  _id: 'Electronics',
+  products: 99,
+  avg_rating: 3
+}
+{
+  _id: 'Home & Kitchen',
+  products: 112,
+  avg_rating: 2.99
+}
+{
+  _id: 'Beauty & Health',
+  products: 106,
+  avg_rating: 2.96
+}
+
+=== Q9. Update: add a review, keep only the 3 newest ($push with $slice), bump the counters ===
+before: count=57, embedded=3
+after:  count=58, embedded=3, newest by Adejoke Ogunyinka
+
+=== Q10. Atomic stock decrement with a guard (no oversell, single document) ===
+first buyer  matched=1 modified=1
+second buyer matched=0 modified=0  <- refused, stock already 0
+stock now: 0
+
+=== Q11. Schema validation rejects a bad document ===
+rejected as expected: Document failed validation
+
+=== Q12. Explain: which index the planner chose for Q1 ===
+winning plan stage: "IXSCAN"
+index used: "category.name_1_price_1"
+docs examined: 32, returned: 18
