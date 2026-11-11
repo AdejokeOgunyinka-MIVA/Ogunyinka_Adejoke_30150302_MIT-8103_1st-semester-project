@@ -1,0 +1,72 @@
+Timing is on.
+TRUNCATE TABLE
+Time: 20.828 ms
+ setseed 
+---------
+ 
+(1 row)
+
+Time: 0.809 ms
+INSERT 0 5000
+Time: 44.622 ms
+INSERT 0 5000
+Time: 50.363 ms
+INSERT 0 2493
+Time: 12.293 ms
+INSERT 0 5
+Time: 0.508 ms
+INSERT 0 15
+Time: 0.347 ms
+INSERT 0 500
+Time: 3.659 ms
+INSERT 0 50000
+Time: 455.727 ms
+INSERT 0 149740
+Time: 1485.365 ms (00:01.485)
+UPDATE 50000
+Time: 258.537 ms
+INSERT 0 50000
+Time: 332.208 ms
+INSERT 0 28465
+Time: 347.952 ms
+INSERT 0 32062
+Time: 307.341 ms
+ANALYZE
+Time: 487.243 ms
+ table_name  | count  
+-------------+--------
+ categories  |     20
+ products    |    500
+ customers   |   5000
+ addresses   |   7493
+ deliveries  |  28465
+ reviews     |  32062
+ payments    |  50000
+ orders      |  50000
+ order_items | 149740
+(9 rows)
+
+Time: 14.943 ms
+ distinct_products | avg_lines_per_order 
+-------------------+---------------------
+               500 |                2.99
+(1 row)
+
+  status   | count 
+-----------+-------
+ delivered | 21434
+ pending   |  7217
+ cancelled |  7168
+ paid      |  7150
+ shipped   |  7031
+(5 rows)
+
+ id |     full_name      |     city     |  status   | total_amount 
+----+--------------------+--------------+-----------+--------------
+  1 | Halima Umar        | Onitsha      | cancelled |   1774848.42
+  2 | Ngozi Okafor       | Lagos Island | cancelled |    842971.73
+  3 | Segun Adeyemi      | Uyo          | delivered |   1885768.85
+  4 | Adejoke Lawal      | Abeokuta     | delivered |   2681065.17
+  5 | Chiamaka Ogunyinka | Lagos Island | pending   |    818518.53
+(5 rows)
+

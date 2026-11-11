@@ -227,6 +227,7 @@ The schema is therefore in 3NF, with two documented, justified exceptions that p
 3. Schema loaded: `psql -d cartify -f sql/01_schema.sql`.
 4. Verified with `\dt` (nine tables) and `\d orders` (constraints visible).
 5. Constraint tests in `sql/02_constraint_tests.sql` confirm the database rejects negative stock, invalid status, duplicate email, and orphan foreign keys.
+6. Seed data generated with sql/03_seed_data.sql: 5,000 customers, 500 products, 50,000 orders and about 150,000 order lines. Verified with row counts.
 
 Screenshots of these steps are in `screenshots/`.
 
@@ -238,3 +239,4 @@ Screenshots of these steps are in `screenshots/`.
 - Chose a self-referencing `categories` table over a fixed two-level design so the hierarchy can grow.
 - Kept `payments` separate from `orders` after realising a single `payment_status` column on orders could not represent a retry after a failed attempt.
 - The hardest decision was whether storing `unit_price` on `order_items` violates 3NF. It does not, because it records a historical fact rather than duplicating a current one.
+- To prepopulate the order table, I wrote a script with the help of AI that used random() to choose customers and delivery/house address. There was a bug where the sub-query for the random ran only once and assigned all the orders to a single customer (the same customer). The fix was to make the query run every time we needed to populate each order row. NB: PostgreSQL may run a sub-query only once if nothing inside it depends on the current row. That's usually a good thing for speed. It's a trap when the sub-query is supposed to produce something different each time.
