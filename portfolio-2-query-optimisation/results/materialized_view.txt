@@ -1,0 +1,40 @@
+Timing is on.
+psql:portfolio-2-query-optimisation/sql/05_materialized_view.sql:15: NOTICE:  materialized view "mv_product_sales" does not exist, skipping
+DROP MATERIALIZED VIEW
+Time: 0.287 ms
+SELECT 500
+Time: 51.061 ms
+CREATE INDEX
+Time: 1.121 ms
+
+=== Q5 via materialised view ===
+                                                                       QUERY PLAN                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.15..1.10 rows=10 width=362) (actual time=0.009..0.011 rows=10 loops=1)
+   Buffers: shared hit=9 read=1
+   ->  Index Scan using idx_mv_product_sales_units on mv_product_sales  (cost=0.15..47.65 rows=500 width=362) (actual time=0.008..0.009 rows=10 loops=1)
+         Buffers: shared hit=9 read=1
+ Planning:
+   Buffers: shared hit=28 read=1
+ Planning Time: 0.121 ms
+ Execution Time: 0.020 ms
+(8 rows)
+
+Time: 0.329 ms
+
+=== Same 10 rows as the live query ===
+ product_id |             name              | units_sold |   revenue    
+------------+-------------------------------+------------+--------------
+         28 | Adidas Milk Powder 28         |        328 |  90113447.36
+        198 | Tecno Pressure Cooker 198     |        323 |  44890911.45
+        215 | Dano Sofa 215                 |        319 |  77650345.19
+         40 | HP Vitamin C 40               |        317 |  26510763.89
+        287 | Oraimo Headset 287            |        317 |  83599915.21
+        448 | Infinix Bluetooth Speaker 448 |        317 | 143509570.86
+        459 | Ankara Kaftan 459             |        316 |  62055274.20
+        149 | Mama Gold Laptop 149          |        313 | 134732515.16
+        305 | Infinix Fridge 305            |        308 |  89070757.16
+        492 | Itel Shirt 492                |        308 |  10123969.24
+(10 rows)
+
+Time: 0.060 ms

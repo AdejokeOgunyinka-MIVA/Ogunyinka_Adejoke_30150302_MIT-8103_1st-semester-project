@@ -1,0 +1,46 @@
+Timing is on.
+CREATE INDEX
+Time: 39.753 ms
+CREATE INDEX
+Time: 59.456 ms
+CREATE INDEX
+Time: 1.330 ms
+CREATE INDEX
+Time: 30.756 ms
+CREATE INDEX
+Time: 41.147 ms
+CREATE INDEX
+Time: 15.720 ms
+CREATE INDEX
+Time: 0.891 ms
+ANALYZE
+Time: 497.060 ms
+
+=== Indexes now present ===
+  tablename  |              indexname              |  size   
+-------------+-------------------------------------+---------
+ addresses   | addresses_pkey                      | 184 kB
+ categories  | categories_name_key                 | 16 kB
+ categories  | categories_pkey                     | 16 kB
+ customers   | customers_email_key                 | 352 kB
+ customers   | customers_pkey                      | 128 kB
+ deliveries  | deliveries_order_id_key             | 640 kB
+ deliveries  | deliveries_pkey                     | 640 kB
+ deliveries  | deliveries_tracking_number_key      | 888 kB
+ order_items | idx_order_items_order               | 2432 kB
+ order_items | idx_order_items_product             | 1032 kB
+ order_items | order_items_order_id_product_id_key | 3312 kB
+ order_items | order_items_pkey                    | 3312 kB
+ orders      | idx_orders_address                  | 536 kB
+ orders      | idx_orders_customer_date            | 1552 kB
+ orders      | idx_orders_status_date              | 1816 kB
+ orders      | orders_pkey                         | 2200 kB
+ payments    | payments_pkey                       | 1112 kB
+ products    | idx_products_category               | 16 kB
+ products    | idx_products_name_lower             | 40 kB
+ products    | products_pkey                       | 32 kB
+ reviews     | reviews_customer_id_product_id_key  | 720 kB
+ reviews     | reviews_pkey                        | 720 kB
+(22 rows)
+
+Time: 2.021 ms
