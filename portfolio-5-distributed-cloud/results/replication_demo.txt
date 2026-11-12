@@ -1,0 +1,78 @@
+################ 1. Load the Cartify schema and data into the primary ################
+   tbl    | count 
+----------+-------
+ orders   | 50004
+ products |   500
+(2 rows)
+
+
+################ 2. Replication status, seen from the primary ################
+ client_addr |   state   | sync_state | sent_lsn  | replay_lsn 
+-------------+-----------+------------+-----------+------------
+ 172.18.0.3  | streaming | async      | 0/55290A0 | 0/55290A0
+(1 row)
+
+
+################ 3. Is each node in recovery (i.e. a standby)? ################
+primary:
+f
+replica:
+t
+
+################ 4. The replica already has the data that was loaded on the primary ################
+   tbl    | count 
+----------+-------
+ orders   | 50004
+ products |   500
+(2 rows)
+
+
+################ 5. Write on the primary, read on the replica ################
+ id  |                name                 
+-----+-------------------------------------
+ 501 | REPLICATION TEST Samsung Galaxy S26
+(1 row)
+
+INSERT 0 1
+replica sees:
+ id  |                name                 |   price   | stock_quantity 
+-----+-------------------------------------+-----------+----------------
+ 501 | REPLICATION TEST Samsung Galaxy S26 | 899000.00 |             25
+(1 row)
+
+
+################ 6. Replication lag (bytes and seconds) ################
+ client_addr |   state   | replay_lag_bytes |   replay_lag    
+-------------+-----------+------------------+-----------------
+ 172.18.0.3  | streaming |                0 | 00:00:00.000701
+(1 row)
+
+
+################ 7. The replica refuses writes ################
+ERROR:  cannot execute UPDATE in a read-only transaction
+
+################ 8. A burst of writes: 1,000 orders on the primary ################
+INSERT 0 1000
+primary count:
+51004
+replica count:
+51004
+
+################ 9. Failover: promote the replica to a standalone primary ################
+waiting for server to promote.... done
+server promoted
+replica in recovery now?
+f
+replica accepts writes now:
+ id  |                name                 | stock_quantity 
+-----+-------------------------------------+----------------
+ 501 | REPLICATION TEST Samsung Galaxy S26 |              0
+(1 row)
+
+UPDATE 1
+old primary no longer has a standby attached:
+ standbys 
+----------
+        0
+(1 row)
+

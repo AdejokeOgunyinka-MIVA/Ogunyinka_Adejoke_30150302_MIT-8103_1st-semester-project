@@ -1,0 +1,55 @@
+DROP TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 50004
+ANALYZE
+=== Rows per partition (shard) ===
+     partition      | orders |    revenue     
+--------------------+--------+----------------
+ orders_south_west  |  28847 | 43298889772.60
+ orders_north       |   9877 | 14813094319.48
+ orders_south_east  |   4808 |  7131881096.35
+ orders_south_south |   6472 |  9698925164.98
+(4 rows)
+
+
+=== Partition pruning: a query for one region touches only that partition ===
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=136.50..136.51 rows=1 width=40) (actual time=0.681..0.681 rows=1 loops=1)
+   Buffers: shared hit=54
+   ->  Seq Scan on orders_south_east orders_by_region  (cost=0.00..126.12 rows=2076 width=8) (actual time=0.004..0.560 rows=2076 loops=1)
+         Filter: (((region)::text = 'South East'::text) AND ((status)::text = 'delivered'::text))
+         Rows Removed by Filter: 2732
+         Buffers: shared hit=54
+ Planning:
+   Buffers: shared hit=9
+ Planning Time: 0.059 ms
+ Execution Time: 0.693 ms
+(10 rows)
+
+
+=== A query without the shard key must scan every partition (scatter-gather) ===
+                                                                     QUERY PLAN                                                                     
+----------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=1336.81..1336.82 rows=1 width=8) (actual time=5.877..5.878 rows=1 loops=1)
+   ->  Append  (cost=0.00..1283.22 rows=21434 width=0) (actual time=0.003..5.123 rows=21434 loops=1)
+         ->  Seq Scan on orders_north orders_by_region_1  (cost=0.00..224.46 rows=4181 width=0) (actual time=0.003..0.785 rows=4181 loops=1)
+               Filter: ((status)::text = 'delivered'::text)
+               Rows Removed by Filter: 5696
+         ->  Seq Scan on orders_south_east orders_by_region_2  (cost=0.00..114.10 rows=2076 width=0) (actual time=0.002..0.343 rows=2076 loops=1)
+               Filter: ((status)::text = 'delivered'::text)
+               Rows Removed by Filter: 2732
+         ->  Seq Scan on orders_south_south orders_by_region_3  (cost=0.00..154.90 rows=2757 width=0) (actual time=0.004..0.530 rows=2757 loops=1)
+               Filter: ((status)::text = 'delivered'::text)
+               Rows Removed by Filter: 3715
+         ->  Seq Scan on orders_south_west orders_by_region_4  (cost=0.00..682.59 rows=12420 width=0) (actual time=0.003..2.239 rows=12420 loops=1)
+               Filter: ((status)::text = 'delivered'::text)
+               Rows Removed by Filter: 16427
+ Planning Time: 0.045 ms
+ Execution Time: 5.885 ms
+(16 rows)
+
